@@ -1,0 +1,60 @@
+import 'package:flutter/material.dart';
+import 'package:popit/components/space_modal.dart';
+import '../classes/space.dart';
+import '../screens/home.dart';
+import '../theme.dart';
+
+class SpaceCard extends StatelessWidget {
+  final Space space;
+  const SpaceCard(this.space, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+          padding: const EdgeInsets.only(left: 15),
+          width: double.infinity,
+          height: 65,
+          decoration: BoxDecoration(
+            color: space.materialColor.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(children: [
+            Text('${space.name} - ${space.bubbleList.length.toString()}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2, 2),
+                        blurRadius: 8.0,
+                        color: Colors.black12,
+                      )
+                    ])),
+            const Icon(Icons.bubble_chart, color: Colors.white, shadows: [
+              Shadow(
+                  offset: Offset(2, 2), blurRadius: 8.0, color: Colors.black12)
+            ]),
+            Expanded(child: Container()),
+            IconButton(
+                onPressed: () => showDialog(
+                    barrierColor: Colors.white.withAlpha(0),
+                    context: context,
+                    builder: (BuildContext context) =>
+                        SpaceModal(space: space)),
+                color: Colors.white,
+                icon: const Icon(Icons.more_vert, shadows: [
+                  Shadow(
+                      offset: Offset(2, 2),
+                      blurRadius: 8.0,
+                      color: Colors.black12)
+                ]),
+                iconSize: 25)
+          ])),
+      onTap: () => Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Home())),
+    );
+  }
+}
