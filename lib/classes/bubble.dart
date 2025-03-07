@@ -1,8 +1,18 @@
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:popit/theme.dart';
+
+part 'bubble.g.dart';
+
 const bubbleTypeList = ['punctual', 'daily', 'weekly', 'monthly'];
 
-class Bubble {
+@HiveType(typeId: 1)
+class Bubble extends HiveObject {
+  @HiveField(0)
   late String name;
+  @HiveField(1)
   late String color;
+  @HiveField(2)
   late String type;
 
   Bubble({required this.name, required this.color, required this.type});
@@ -11,6 +21,12 @@ class Bubble {
     name = json['name'];
     color = json['color'];
     type = json['type'];
+  }
+
+  Bubble.fromTemplate() {
+    name = '';
+    color = 'blue';
+    type = bubbleTypeList[0];
   }
 
   Bubble.copy(Bubble other) {
@@ -56,8 +72,12 @@ class Bubble {
     return data;
   }
 
+  MaterialColor get materialColor {
+    return COLORS[color] ?? Colors.grey;
+  }
+
   @override
   String toString() {
-    return 'Tapis : $name / Travail : $type / color : $color';
+    return 'Name : $name / Type : $type / Color : $color';
   }
 }

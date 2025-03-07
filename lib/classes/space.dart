@@ -1,42 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:popit/theme.dart';
 import 'bubble.dart';
 
-final Map<String, MaterialColor> COLORS = {
-  'blue': Colors.blue,
-  'red': Colors.red,
-  'grey': Colors.grey,
-  'orange': Colors.orange,
-  'pink': Colors.pink,
-};
+part 'space.g.dart';
 
-class Space {
+@HiveType(typeId: 0)
+class Space extends HiveObject {
+  @HiveField(0)
   late String name;
+  @HiveField(1)
   late String color;
-  late MaterialColor materialColor;
+  @HiveField(2)
   late List<Bubble> bubbleList;
 
-  Space({required this.name, required this.color, required this.bubbleList}) {
-    materialColor = COLORS[color] ?? Colors.grey;
-  }
+  Space({required this.name, required this.color, required this.bubbleList});
 
   Space.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     color = json['color'];
-    materialColor = COLORS[color] ?? Colors.grey;
     bubbleList = json['bubbleList'];
   }
 
   Space.fromTemplate() {
     name = '';
-    color = 'grey';
-    materialColor = Colors.grey;
+    color = 'blue';
     bubbleList = [];
   }
 
   Space.copy(Space other) {
     name = other.name;
     color = other.color;
-    materialColor = other.materialColor;
     bubbleList = other.bubbleList;
   }
 
@@ -67,6 +61,10 @@ class Space {
       default:
         throw Exception('Propriété non trouvée');
     }
+  }
+
+  MaterialColor get materialColor {
+    return COLORS[color] ?? Colors.grey;
   }
 
   Map<String, dynamic> toJson() {

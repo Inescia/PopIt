@@ -1,61 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:popit/classes/bubble.dart';
 import 'package:popit/providers/space_provider.dart';
 import 'package:provider/provider.dart';
 import '../classes/space.dart';
 import '../theme.dart';
 import 'dart:ui';
 
-class SpaceModal extends StatefulWidget {
+class BubbleModal extends StatefulWidget {
   final bool isNew;
-  final Space? space;
+  final Bubble? bubble;
   final int? index;
+  final int spaceIndex;
 
-  const SpaceModal({this.isNew = false, this.space, this.index, super.key});
+  const BubbleModal(
+      {required this.spaceIndex,
+      this.isNew = false,
+      this.bubble,
+      this.index,
+      super.key});
 
   @override
-  State<SpaceModal> createState() => _SpaceModal();
+  State<BubbleModal> createState() => _BubbleModal();
 }
 
-class _SpaceModal extends State<SpaceModal> {
+class _BubbleModal extends State<BubbleModal> {
   final TextEditingController _controller = TextEditingController();
-  Space _space = Space.fromTemplate();
+  Bubble _bubble = Bubble.fromTemplate();
   bool _isLoading = false;
 
   /* API CALLS */
-  Future<void> _addSpace(BuildContext context) async {
-    if (_controller.text == '') return;
-    setState(() => _isLoading = true);
-    await Provider.of<SpaceProvider>(context, listen: false).addSpace(_space);
-    setState(() => _isLoading = false);
-  }
-
-  Future<void> _removeSpace(BuildContext context) async {
-    setState(() => _isLoading = true);
-    await Provider.of<SpaceProvider>(context, listen: false)
-        .removeSpace(widget.index!);
-    setState(() => _isLoading = false);
-  }
-
-  Future<void> _updateSpace(BuildContext context) async {
+  Future<void> _addBubble(BuildContext context) async {
     if (_controller.text == '') return;
     setState(() => _isLoading = true);
     await Provider.of<SpaceProvider>(context, listen: false)
-        .updateSpace(_space, widget.index!);
+        .addBubble(widget.spaceIndex, _bubble);
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _removeBubble(BuildContext context) async {
+    setState(() => _isLoading = true);
+    await Provider.of<SpaceProvider>(context, listen: false)
+        .removeBubble(widget.spaceIndex, widget.index!);
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _updateBubble(BuildContext context) async {
+    if (_controller.text == '') return;
+    setState(() => _isLoading = true);
+    await Provider.of<SpaceProvider>(context, listen: false)
+        .updateBubble(widget.spaceIndex, _bubble, widget.index!);
     setState(() => _isLoading = false);
   }
 
   /* METHODS */
   void _changeColorByIndex(int index) {
     var color = COLORS.entries.elementAt(index);
-    _space.color = color.key;
+    _bubble.color = color.key;
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.space != null) _space = Space.copy(widget.space!);
-    _controller.text = _space.name;
+    if (widget.bubble != null) _bubble = Bubble.copy(widget.bubble!);
+    _controller.text = _bubble.name;
   }
 
   @override
@@ -80,7 +88,9 @@ class _SpaceModal extends State<SpaceModal> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  widget.isNew ? 'Nouvel espace' : _space.name,
+                                  widget.isNew
+                                      ? 'Nouvelle bulle'
+                                      : _bubble.name,
                                   style: const TextStyle(
                                       fontSize: 20, color: Colors.black),
                                 ),
@@ -94,7 +104,7 @@ class _SpaceModal extends State<SpaceModal> {
                           TextField(
                               controller: _controller,
                               onChanged: (value) =>
-                                  setState(() => _space.name = value),
+                                  setState(() => _bubble.name = value),
                               decoration: InputDecoration(
                                 errorText: _controller.text.isEmpty
                                     ? 'Le nom est obligatoire'
@@ -125,7 +135,8 @@ class _SpaceModal extends State<SpaceModal> {
                                                   BorderRadius.circular(5),
                                               border: Border.all(
                                                   color: Colors.white,
-                                                  width: _space.materialColor ==
+                                                  width: _bubble
+                                                              .materialColor ==
                                                           getColorByIndex(index)
                                                       ? 2
                                                       : 0),
@@ -154,11 +165,12 @@ class _SpaceModal extends State<SpaceModal> {
                                                   BorderRadius.circular(5),
                                               border: Border.all(
                                                   color: Colors.white,
-                                                  width: _space.materialColor ==
-                                                          getColorByIndex(
-                                                              index + 5)
-                                                      ? 2
-                                                      : 0),
+                                                  width:
+                                                      _bubble.materialColor ==
+                                                              getColorByIndex(
+                                                                  index + 5)
+                                                          ? 2
+                                                          : 0),
                                               color: getColorByIndex(index + 5)
                                                   .shade200)))),
                             )
@@ -178,7 +190,7 @@ class _SpaceModal extends State<SpaceModal> {
                                               child: CircularProgressIndicator(
                                                   strokeWidth: 2))
                                           : const Text('Supprimer'),
-                                      onPressed: () => _removeSpace(context)
+                                      onPressed: () => _removeBubble(context)
                                           .then((value) =>
                                               Navigator.of(context).pop())),
                                 TextButton(
@@ -192,8 +204,8 @@ class _SpaceModal extends State<SpaceModal> {
                                             ? 'Ajouter'
                                             : 'Valider'),
                                     onPressed: () => (widget.isNew
-                                            ? _addSpace(context)
-                                            : _updateSpace(context))
+                                            ? _addBubble(context)
+                                            : _updateBubble(context))
                                         .then((value) =>
                                             Navigator.of(context).pop()))
                               ])

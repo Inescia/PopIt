@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:popit/screens/home.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:popit/providers/locale_provider.dart';
+import 'package:popit/providers/space_provider.dart';
 import 'package:popit/theme.dart';
-import 'package:popit/screens/dashboard.dart';
-import 'package:popit/screens/home.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -14,22 +18,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: const Dashboard(),
-        locale: const Locale('fr'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+    SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark));
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => LocaleProvider()),
+          ChangeNotifierProvider(create: (context) => SpaceProvider()),
         ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('es'),
-          Locale('fr'),
-        ],
-        title: 'Pop It',
-        theme: theme());
+        child: Builder(builder: (context) {
+          final provider = Provider.of<LocaleProvider>(context);
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: const Home(),
+              locale: provider.locale,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en'),
+                Locale('es'),
+                Locale('fr'),
+              ],
+              title: 'Pop It',
+              theme: theme());
+        }));
   }
 }
