@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:popit/providers/space_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:popit/providers/app_provider.dart';
 import 'package:provider/provider.dart';
-import '../classes/space.dart';
-import '../theme.dart';
+import 'package:popit/classes/space.dart';
+import 'package:popit/theme.dart';
 import 'dart:ui';
 
 class SpaceModal extends StatefulWidget {
@@ -25,13 +26,13 @@ class _SpaceModal extends State<SpaceModal> {
   Future<void> _addSpace(BuildContext context) async {
     if (_controller.text == '') return;
     setState(() => _isLoading = true);
-    await Provider.of<SpaceProvider>(context, listen: false).addSpace(_space);
+    await Provider.of<AppProvider>(context, listen: false).addSpace(_space);
     setState(() => _isLoading = false);
   }
 
   Future<void> _removeSpace(BuildContext context) async {
     setState(() => _isLoading = true);
-    await Provider.of<SpaceProvider>(context, listen: false)
+    await Provider.of<AppProvider>(context, listen: false)
         .removeSpace(widget.index!);
     setState(() => _isLoading = false);
   }
@@ -39,7 +40,7 @@ class _SpaceModal extends State<SpaceModal> {
   Future<void> _updateSpace(BuildContext context) async {
     if (_controller.text == '') return;
     setState(() => _isLoading = true);
-    await Provider.of<SpaceProvider>(context, listen: false)
+    await Provider.of<AppProvider>(context, listen: false)
         .updateSpace(_space, widget.index!);
     setState(() => _isLoading = false);
   }
@@ -56,6 +57,12 @@ class _SpaceModal extends State<SpaceModal> {
     super.initState();
     if (widget.space != null) _space = Space.copy(widget.space!);
     _controller.text = _space.name;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -80,7 +87,10 @@ class _SpaceModal extends State<SpaceModal> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  widget.isNew ? 'Nouvel espace' : _space.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  widget.isNew
+                                      ? AppLocalizations.of(context)!.new_space
+                                      : _space.name,
                                   style: const TextStyle(
                                       fontSize: 20, color: Colors.black),
                                 ),
@@ -92,16 +102,20 @@ class _SpaceModal extends State<SpaceModal> {
                               ]),
                           const SizedBox(height: 15),
                           TextField(
+                              maxLength: 35,
+                              textCapitalization: TextCapitalization.sentences,
                               controller: _controller,
                               onChanged: (value) =>
                                   setState(() => _space.name = value),
                               decoration: InputDecoration(
                                 errorText: _controller.text.isEmpty
-                                    ? 'Le nom est obligatoire'
+                                    ? AppLocalizations.of(context)!
+                                        .field_name_required
                                     : null,
                                 isDense: true,
                                 labelStyle: const TextStyle(fontSize: 12),
-                                labelText: 'Nom *',
+                                labelText:
+                                    AppLocalizations.of(context)!.field_name,
                               )),
                           const SizedBox(height: 20),
                           Column(children: [
@@ -177,7 +191,8 @@ class _SpaceModal extends State<SpaceModal> {
                                               height: 15,
                                               child: CircularProgressIndicator(
                                                   strokeWidth: 2))
-                                          : const Text('Supprimer'),
+                                          : Text(AppLocalizations.of(context)!
+                                              .button_remove),
                                       onPressed: () => _removeSpace(context)
                                           .then((value) =>
                                               Navigator.of(context).pop())),
@@ -189,13 +204,17 @@ class _SpaceModal extends State<SpaceModal> {
                                             child: CircularProgressIndicator(
                                                 strokeWidth: 2))
                                         : Text(widget.isNew
-                                            ? 'Ajouter'
-                                            : 'Valider'),
-                                    onPressed: () => (widget.isNew
-                                            ? _addSpace(context)
-                                            : _updateSpace(context))
-                                        .then((value) =>
-                                            Navigator.of(context).pop()))
+                                            ? AppLocalizations.of(context)!
+                                                .button_add
+                                            : AppLocalizations.of(context)!
+                                                .button_update),
+                                    onPressed: () => _controller.text.isEmpty
+                                        ? null
+                                        : (widget.isNew
+                                                ? _addSpace(context)
+                                                : _updateSpace(context))
+                                            .then((value) =>
+                                                Navigator.of(context).pop()))
                               ])
                         ]))))));
   }

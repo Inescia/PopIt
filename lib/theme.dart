@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 
 final Map<String, MaterialColor> COLORS = {
   'blue': Colors.blue,
-  'red': Colors.red,
-  'grey': Colors.grey,
-  'orange': Colors.orange,
-  'pink': Colors.pink,
-  'amber': Colors.amber,
   'purple': Colors.deepPurple,
-  'teal': Colors.teal,
+  'pink': Colors.pink,
+  'red': Colors.red,
+  'grey': Colors.deepOrange,
+  'orange': Colors.orange,
+  'amber': Colors.amber,
   'green': Colors.green,
+  'teal': Colors.teal,
   'brown': Colors.brown,
 };
 
@@ -30,7 +30,7 @@ ThemeData theme() {
     colorScheme: ColorScheme.fromSwatch(
       primarySwatch: Colors.grey,
     ).copyWith(
-      primary: Colors.grey.shade600,
+      primary: Colors.grey.shade700,
       onPrimary: Colors.white,
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(

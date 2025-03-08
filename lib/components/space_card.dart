@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:popit/classes/space.dart';
-import 'package:popit/screens/home.dart';
 import 'package:popit/components/space_modal.dart';
 
 class SpaceCard extends StatelessWidget {
   final Space space;
   final int index;
-  const SpaceCard({required this.space, required this.index, super.key});
+  final VoidCallback onTap;
+  const SpaceCard(
+      {required this.space,
+      required this.onTap,
+      required this.index,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
           transitionBuilder: (child, animation) {
@@ -22,6 +27,12 @@ class SpaceCard extends StatelessWidget {
               width: double.infinity,
               height: 65,
               decoration: BoxDecoration(
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black26,
+                      offset: Offset(0, 2),
+                      blurRadius: 3)
+                ],
                 color: space.materialColor.shade200,
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -60,8 +71,6 @@ class SpaceCard extends StatelessWidget {
                     ]),
                     iconSize: 25)
               ]))),
-      onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => Home(initialPage: index + 1))),
     );
   }
 }

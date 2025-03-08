@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -6,10 +7,12 @@ import 'package:popit/classes/bubble.dart';
 class BubbleWidget extends StatefulWidget {
   final Bubble bubble;
   final VoidCallback onTap;
+  final Function onDraggingToggle;
   final VoidCallback onPopit;
 
   const BubbleWidget(
       {required this.onTap,
+      required this.onDraggingToggle,
       required this.onPopit,
       required this.bubble,
       super.key});
@@ -27,10 +30,13 @@ class _BubbleWidgetState extends State<BubbleWidget>
 
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  bool isExploding = false;
+  bool _isExploding = false;
+
+  late DateTime _pressStartTime;
+  double _pressDuration = 0; // La durée de la pression
 
   void _updatePosition(Duration elapsed) {
-    if (isExploding) return;
+    if (_isExploding) return;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -49,9 +55,16 @@ class _BubbleWidgetState extends State<BubbleWidget>
     setState(() {});
   }
 
-  void _onLongPress() {
-    setState(() => isExploding = true);
+  void _onLongPressStart(LongPressStartDetails details) {
+    _pressStartTime = DateTime.now();
     _controller.forward();
+  }
+
+  void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    final pressTime = DateTime.now().difference(_pressStartTime).inMilliseconds;
+    const totalPressTime = 1000;
+    final animationProgress = (pressTime / totalPressTime).clamp(0.0, 1.0);
+    _controller.value = animationProgress;
   }
 
   @override
@@ -61,19 +74,20 @@ class _BubbleWidgetState extends State<BubbleWidget>
     _position = Offset(random.nextDouble() * 300, random.nextDouble() * 600);
     _velocity =
         Offset((random.nextDouble() * 4) - 2, (random.nextDouble() * 4) - 2);
-
     _ticker = createTicker(_updatePosition);
     _ticker.start();
 
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 800));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 2.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.addStatusListener((status) {
-      if (AnimationStatus.completed == status) {
+      if (AnimationStatus.completed != status) {
+        _isExploding = true;
+      } else {
+        _isExploding = false;
         widget.onPopit();
-        setState(() => isExploding = false);
       }
     });
   }
@@ -94,7 +108,11 @@ class _BubbleWidgetState extends State<BubbleWidget>
         top: _position.dy,
         child: GestureDetector(
             onTap: widget.onTap,
-            onDoubleTap: _onLongPress,
+            onDoubleTap: () => _controller.forward(),
+            onLongPressStart: _onLongPressStart,
+            onLongPressMoveUpdate: _onLongPressMoveUpdate,
+            onPanStart: (details) => widget.onDraggingToggle(true),
+            onPanEnd: (details) => widget.onDraggingToggle(false),
             onPanUpdate: (details) {
               _position += details.delta;
               _velocity = details.delta * 0.5;
@@ -103,7 +121,7 @@ class _BubbleWidgetState extends State<BubbleWidget>
                 animation: _controller,
                 builder: (context, child) {
                   return Transform.scale(
-                      scale: isExploding ? _scaleAnimation.value : 1.0,
+                      scale: _isExploding ? _scaleAnimation.value : 1.0,
                       child: Container(
                           width: _bubbleSize,
                           height: _bubbleSize,
@@ -128,13 +146,16 @@ class _BubbleWidgetState extends State<BubbleWidget>
                             ],
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            widget.bubble.name,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          )));
+                          child: Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Text(
+                                widget.bubble.name,
+                                textAlign: TextAlign.center,
+                                softWrap: true,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ))));
                 })));
   }
 }

@@ -29,6 +29,7 @@ class LocaleIcon extends StatelessWidget {
     }
 
     return IconButton(
+        iconSize: 22,
         padding: const EdgeInsets.all(10),
         icon: Image.asset('assets/${locale.toString()}.png'),
         onPressed: () => setLocale());

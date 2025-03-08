@@ -1,4 +1,15 @@
 {
 	"@@locale": "en",
-	"pageTitle": "Dashboard"
+	"dashboard": "Dashboard",
+	"new_space": "New Space",
+	"new_bubble": "New Bubble",
+	"button_add": "Add",
+	"button_remove": "Remove",
+	"button_update": "Validate",
+	"field_name": "Name",
+	"field_name_required": "Name is required.",
+	"type_punctual": "Punctual",
+	"type_daily": "Daily",
+	"type_weekly": "Weekly",
+	"type_monthly": "Monthly"
 }

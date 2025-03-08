@@ -1,4 +1,15 @@
 {
 	"@@locale": "es",
-	"pageTitle": "Cuadro de mandos"
+	"dashboard": "Cuadro de mandos",
+	"new_space": "Nuevo Espacio",
+	"new_bubble": "Nueva burbuja",
+	"button_add": "Añadir",
+	"button_remove": "Borrar",
+	"button_update": "Valider",
+	"field_name": "Nombre",
+	"field_name_required": "El nombre es obligatorio.",
+	"type_punctual": "Ponctual",
+	"type_daily": "Diario",
+	"type_weekly": "Semanal",
+	"type_monthly": "Mensual"
 }

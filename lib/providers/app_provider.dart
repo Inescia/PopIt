@@ -3,10 +3,10 @@ import 'package:popit/classes/bubble.dart';
 import 'package:popit/classes/space.dart';
 import 'package:popit/services.dart';
 
-class SpaceProvider extends ChangeNotifier {
+class AppProvider extends ChangeNotifier {
   List<Space> _spaceList = [];
 
-  SpaceProvider() {
+  AppProvider() {
     HiveService.initHive().then((value) => loadSpaceList());
   }
 

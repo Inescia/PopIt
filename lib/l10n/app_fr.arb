@@ -1,4 +1,15 @@
 {
 	"@@locale": "fr",
-	"pageTitle": "Tableau de bord"
+	"dashboard": "Tableau de bord",
+	"new_space": "Nouvel Espace",
+	"new_bubble": "Nouvelle Bulle",
+	"button_add": "Ajouter",
+	"button_remove": "Supprimer",
+	"button_update": "Valider",
+	"field_name": "Nom",
+	"field_name_required": "Le nom est obligatoire.",
+	"type_punctual": "Ponctuelle",
+	"type_daily": "Quotidienne",
+	"type_weekly": "Hebdomadaire",
+	"type_monthly": "Mensuelle"
 }
