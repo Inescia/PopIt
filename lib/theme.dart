@@ -6,7 +6,7 @@ final Map<String, MaterialColor> COLORS = {
   'purple': Colors.deepPurple,
   'pink': Colors.pink,
   'red': Colors.red,
-  'grey': Colors.deepOrange,
+  'salmon': Colors.deepOrange,
   'orange': Colors.orange,
   'amber': Colors.amber,
   'green': Colors.green,
@@ -15,6 +15,7 @@ final Map<String, MaterialColor> COLORS = {
 };
 
 MaterialColor getColorByIndex(int index) {
+  if (index < 0 || index >= COLORS.length) return Colors.grey;
   return COLORS.values.elementAt(index);
 }
 
@@ -37,10 +38,6 @@ ThemeData theme() {
         backgroundColor: Colors.grey.shade600,
         foregroundColor: Colors.white,
         shape: const CircleBorder()),
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-    }),
     visualDensity: VisualDensity.adaptivePlatformDensity,
   );
 }

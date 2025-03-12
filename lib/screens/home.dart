@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:popit/components/locale-icon.dart';
+import 'package:popit/components/locale_icon.dart';
 import 'package:popit/classes/bubble.dart';
 import 'package:popit/components/bubble_modal.dart';
 import 'package:popit/components/bubble_widget.dart';
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 class Home extends StatefulWidget {
   final int initialPage;
   const Home({this.initialPage = 0, super.key});
+
   @override
   State<Home> createState() => _Home();
 }
@@ -22,18 +24,15 @@ class _Home extends State<Home> {
   int _currentPage = 0;
   bool _isDragging = false;
 
-  Future<void> _removeBubble(BuildContext context, int index) async {
-    await Provider.of<AppProvider>(context, listen: false)
-        .removeBubble(_currentPage - 1, index);
-    setState(() {});
-  }
+  bool _isDashboard([int? index]) => index == 0 || _currentPage == 0;
 
   Color _getColorByIndex(AppProvider provider, int index) {
     return provider.getSpaceByIndex(index)!.materialColor.shade200;
   }
 
-  bool _isDashboard([int? index]) {
-    return index == 0 || _currentPage == 0;
+  Future<void> _removeBubble(BuildContext context, int index) async {
+    await Provider.of<AppProvider>(context, listen: false)
+        .removeBubble(_currentPage - 1, index);
   }
 
   @override
@@ -53,7 +52,20 @@ class _Home extends State<Home> {
                     color: _isDashboard()
                         ? Theme.of(context).primaryColor
                         : _getColorByIndex(provider, _currentPage - 1))),
-            actions: _isDashboard() ? const [LocaleIcon()] : null,
+            actions: _isDashboard()
+                ? const [LocaleIcon()]
+                : [
+                    IconButton(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 17),
+                        onPressed: () => _pageController.animateToPage(
+                              0,
+                              duration: Duration(
+                                  milliseconds: 300 * (_currentPage + 1)),
+                              curve: Curves.easeInOut,
+                            ),
+                        icon: Image.asset('assets/home.png'))
+                  ],
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(3),
                 child: Container(
@@ -81,23 +93,35 @@ class _Home extends State<Home> {
               onPageChanged: (index) => setState(() => _currentPage = index),
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return SingleChildScrollView(
-                      child: Container(
-                          margin: const EdgeInsets.only(top: 80),
-                          padding: const EdgeInsets.only(top: 15, bottom: 35),
-                          width: double.infinity,
-                          child: Column(children: [
-                            for (var entry
-                                in provider.spaceList.asMap().entries)
-                              SpaceCard(
-                                  space: entry.value,
-                                  index: entry.key,
-                                  onTap: () => _pageController.animateToPage(
-                                      entry.key + 1,
-                                      duration: Duration(
-                                          milliseconds: 300 * (entry.key + 1)),
-                                      curve: Curves.easeInOut))
-                          ])));
+                  return ReorderableListView(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).padding.top + 15,
+                          bottom: 120,
+                          left: 15,
+                          right: 15),
+                      proxyDecorator: (child, index, animation) => Material(
+                          elevation: 10,
+                          color: Colors.transparent,
+                          shadowColor: Colors.grey,
+                          borderRadius: BorderRadius.circular(20),
+                          child: child),
+                      onReorder: (oldIndex, newIndex) {
+                        if (oldIndex < newIndex) newIndex -= 1;
+                        provider.reorderSpaceList(oldIndex, newIndex);
+                      },
+                      children: [
+                        for (var entry in provider.spaceList.asMap().entries)
+                          SpaceCard(
+                              key: ValueKey(entry.key),
+                              space: entry.value,
+                              index: entry.key,
+                              onTap: () => _pageController.animateToPage(
+                                    entry.key + 1,
+                                    duration: Duration(
+                                        milliseconds: 300 * (entry.key + 1)),
+                                    curve: Curves.easeInOut,
+                                  )),
+                      ]);
                 } else {
                   return Stack(alignment: Alignment.center, children: [
                     for (MapEntry<int, Bubble> entry in provider
@@ -105,11 +129,13 @@ class _Home extends State<Home> {
                         .asMap()
                         .entries)
                       BubbleWidget(
+                          key: ValueKey(entry.value),
                           bubble: entry.value,
                           onDraggingToggle: (value) => _isDragging = value,
                           onPopit: () => _removeBubble(context, entry.key),
                           onTap: () => showDialog(
                               context: context,
+                              barrierDismissible: false,
                               barrierColor: Colors.white.withAlpha(0),
                               builder: (BuildContext context) => BubbleModal(
                                     spaceIndex: index - 1,
@@ -141,7 +167,7 @@ class _Home extends State<Home> {
                     })))
         ]),
         floatingActionButton: _isDashboard()
-            ? provider.spaceList.length < 10
+            ? provider.spaceList.length < 20
                 ? FloatingActionButton(
                     backgroundColor: Theme.of(context).primaryColor,
                     child: const Icon(Icons.add_rounded, size: 40),
@@ -151,17 +177,17 @@ class _Home extends State<Home> {
                         builder: (BuildContext context) =>
                             const SpaceModal(isNew: true)))
                 : null
-            : provider.spaceList[_currentPage - 1].bubbleList.length < 8
+            : provider.spaceList[_currentPage - 1].bubbleList.length < 10
                 ? FloatingActionButton(
                     backgroundColor:
                         _getColorByIndex(provider, _currentPage - 1),
                     child: const Icon(Icons.add_rounded, size: 40),
                     onPressed: () => showDialog(
-                        barrierColor: Colors.white.withAlpha(0),
                         context: context,
+                        barrierColor: Colors.white.withAlpha(0),
+                        barrierDismissible: false,
                         builder: (BuildContext context) => BubbleModal(
-                            spaceIndex: _currentPage - 1, isNew: true)),
-                  )
+                            spaceIndex: _currentPage - 1, isNew: true)))
                 : null);
   }
 }

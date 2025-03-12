@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -33,7 +32,6 @@ class _BubbleWidgetState extends State<BubbleWidget>
   bool _isExploding = false;
 
   late DateTime _pressStartTime;
-  double _pressDuration = 0; // La durée de la pression
 
   void _updatePosition(Duration elapsed) {
     if (_isExploding) return;
@@ -60,6 +58,11 @@ class _BubbleWidgetState extends State<BubbleWidget>
     _controller.forward();
   }
 
+  void _onLongPressEnd(LongPressEndDetails details) {
+    _pressStartTime = DateTime.now();
+    _controller.reverse();
+  }
+
   void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     final pressTime = DateTime.now().difference(_pressStartTime).inMilliseconds;
     const totalPressTime = 1000;
@@ -83,12 +86,8 @@ class _BubbleWidgetState extends State<BubbleWidget>
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.addStatusListener((status) {
-      if (AnimationStatus.completed != status) {
-        _isExploding = true;
-      } else {
-        _isExploding = false;
-        widget.onPopit();
-      }
+      _isExploding = status.isAnimating;
+      if (status.isCompleted) widget.onPopit();
     });
   }
 
@@ -110,6 +109,7 @@ class _BubbleWidgetState extends State<BubbleWidget>
             onTap: widget.onTap,
             onDoubleTap: () => _controller.forward(),
             onLongPressStart: _onLongPressStart,
+            onLongPressEnd: _onLongPressEnd,
             onLongPressMoveUpdate: _onLongPressMoveUpdate,
             onPanStart: (details) => widget.onDraggingToggle(true),
             onPanEnd: (details) => widget.onDraggingToggle(false),

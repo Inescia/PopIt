@@ -3,7 +3,7 @@ description: A minimalist todo list with bubbles.
 
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=2.19.0-146.2.beta <3.0.0'
@@ -23,6 +23,7 @@ dependencies:
   path_provider: ^2.0.8
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  in_app_purchase: ^3.2.1
 
 dev_dependencies:
   flutter_test:

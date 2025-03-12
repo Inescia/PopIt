@@ -28,12 +28,13 @@ class HiveService {
   }
 
   static Space? getSpaceByIndex(int index) {
+    if (index < 0 || index >= box.length) return null;
     return box.getAt(index);
   }
 
   static List<Bubble> getBubbleList(int spaceIndex) {
-    Space space = getSpaceByIndex(spaceIndex)!;
-    return space.bubbleList;
+    Space? space = getSpaceByIndex(spaceIndex);
+    return space?.bubbleList ?? [];
   }
 
   static Future<void> addSpace(Space space) async {
@@ -46,7 +47,9 @@ class HiveService {
 
   static Future<void> updateSpaceByIndex(int index, Space space) async {
     try {
-      await box.putAt(index, space);
+      if (getSpaceByIndex(index) != null) {
+        await box.putAt(index, space);
+      }
     } catch (e) {
       debugPrint('Error updateSpaceByIndex() : $e');
     }
@@ -54,7 +57,9 @@ class HiveService {
 
   static Future<void> removeSpaceByIndex(int index) async {
     try {
-      await box.deleteAt(index);
+      if (getSpaceByIndex(index) != null) {
+        await box.deleteAt(index);
+      }
     } catch (e) {
       debugPrint('Error removeSpaceByIndex() : $e');
     }
@@ -62,8 +67,11 @@ class HiveService {
 
   static Future<void> addBubble(int spaceIndex, Bubble bubble) async {
     try {
-      Space space = getSpaceByIndex(spaceIndex)!;
-      space.bubbleList.add(bubble);
+      Space? space = getSpaceByIndex(spaceIndex);
+      if (space == null) return;
+
+      List<Bubble> updatedBubbles = List.from(space.bubbleList)..add(bubble);
+      space.bubbleList = updatedBubbles;
       await space.save();
     } catch (e) {
       debugPrint('Error addBubble() : $e');
@@ -73,21 +81,32 @@ class HiveService {
   static Future<void> updateBubbleByIndex(
       int spaceIndex, int index, Bubble bubble) async {
     try {
-      Space space = getSpaceByIndex(spaceIndex)!;
-      space.bubbleList[index] = bubble;
+      Space? space = getSpaceByIndex(spaceIndex);
+      if (space == null || index < 0 || index >= space.bubbleList.length)
+        return;
+
+      List<Bubble> updatedBubbles = List.from(space.bubbleList);
+      updatedBubbles[index] = bubble;
+      space.bubbleList = updatedBubbles;
       await space.save();
     } catch (e) {
-      debugPrint('Error updateBubble() : $e');
+      debugPrint('Error updateBubbleByIndex() : $e');
     }
   }
 
   static Future<void> removeBubbleByIndex(int spaceIndex, int index) async {
     try {
-      Space space = getSpaceByIndex(spaceIndex)!;
-      space.bubbleList.removeAt(index);
+      Space? space = getSpaceByIndex(spaceIndex);
+      if (space == null || index < 0 || index >= space.bubbleList.length) {
+        return;
+      }
+
+      List<Bubble> updatedBubbles = List.from(space.bubbleList)
+        ..removeAt(index);
+      space.bubbleList = updatedBubbles;
       await space.save();
     } catch (e) {
-      debugPrint('Error removeBubble() : $e');
+      debugPrint('Error removeBubbleByIndex() : $e');
     }
   }
 

@@ -12,6 +12,33 @@ class SpaceCard extends StatelessWidget {
       required this.index,
       super.key});
 
+  BoxShadow get _boxShadow => BoxShadow(
+        color: Colors.black26,
+        offset: Offset(0, 2),
+        blurRadius: 3,
+      );
+
+  TextStyle get _textStyle => TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              offset: Offset(2, 2),
+              blurRadius: 8.0,
+              color: Colors.black12,
+            )
+          ]);
+
+  void _showSpaceModal(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.white.withAlpha(0),
+      context: context,
+      builder: (BuildContext context) => SpaceModal(space: space, index: index),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -22,33 +49,18 @@ class SpaceCard extends StatelessWidget {
             return ScaleTransition(scale: animation, child: child);
           },
           child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+              margin: const EdgeInsets.symmetric(vertical: 6),
               padding: const EdgeInsets.only(left: 15),
               width: double.infinity,
               height: 65,
               decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 3)
-                ],
+                // boxShadow: [_boxShadow],
                 color: space.materialColor.shade200,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(children: [
                 Text('${space.name} - ${space.bubbleList.length.toString()}',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(2, 2),
-                            blurRadius: 8.0,
-                            color: Colors.black12,
-                          )
-                        ])),
+                    style: _textStyle),
                 const Icon(Icons.bubble_chart, color: Colors.white, shadows: [
                   Shadow(
                       offset: Offset(2, 2),
@@ -57,11 +69,7 @@ class SpaceCard extends StatelessWidget {
                 ]),
                 Expanded(child: Container()),
                 IconButton(
-                    onPressed: () => showDialog(
-                        barrierColor: Colors.white.withAlpha(0),
-                        context: context,
-                        builder: (BuildContext context) =>
-                            SpaceModal(space: space, index: index)),
+                    onPressed: () => _showSpaceModal(context),
                     color: Colors.white,
                     icon: const Icon(Icons.more_vert, shadows: [
                       Shadow(

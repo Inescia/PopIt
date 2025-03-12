@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:popit/theme.dart';
@@ -15,61 +16,20 @@ class Bubble extends HiveObject {
   @HiveField(2)
   late String type;
 
-  Bubble({required this.name, required this.color, required this.type});
+  Bubble({required this.name, required this.color, required String type})
+      : type = bubbleTypeList.contains(type) ? type : bubbleTypeList[0];
 
-  Bubble.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    color = json['color'];
-    type = json['type'];
-  }
+  Bubble.copy(Bubble other)
+      : name = other.name,
+        color = other.color,
+        type = other.type;
 
   Bubble.fromTemplate() {
     name = '';
-    color = 'blue';
+    Random random = Random();
+    int randomNumber = random.nextInt(10);
+    color = COLORS.keys.elementAt(randomNumber);
     type = bubbleTypeList[0];
-  }
-
-  Bubble.copy(Bubble other) {
-    name = other.name;
-    color = other.color;
-    type = other.type;
-  }
-
-  dynamic operator [](String key) {
-    switch (key) {
-      case 'name':
-        return name;
-      case 'color':
-        return color;
-      case 'type':
-        return type;
-      default:
-        throw Exception('Propriété non trouvée');
-    }
-  }
-
-  void operator []=(String key, dynamic value) {
-    switch (key) {
-      case 'name':
-        name = value;
-        break;
-      case 'color':
-        color = value;
-        break;
-      case 'type':
-        type = value;
-        break;
-      default:
-        throw Exception('Propriété non trouvée');
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, String> data = <String, String>{};
-    data['name'] = name;
-    data['color'] = color;
-    data['type'] = type;
-    return data;
   }
 
   MaterialColor get materialColor {
