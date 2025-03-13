@@ -2,12 +2,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:popit/classes/bubble.dart';
+import 'package:popit/classes/particle.dart';
 
 class BubbleWidget extends StatefulWidget {
   final Bubble bubble;
   final VoidCallback onTap;
   final Function onDraggingToggle;
-  final VoidCallback onPopit;
+  final Function(List<Particle>) onPopit;
 
   const BubbleWidget(
       {required this.onTap,
@@ -17,7 +18,7 @@ class BubbleWidget extends StatefulWidget {
       super.key});
 
   @override
-  _BubbleWidgetState createState() => _BubbleWidgetState();
+  State<BubbleWidget> createState() => _BubbleWidgetState();
 }
 
 class _BubbleWidgetState extends State<BubbleWidget>
@@ -53,19 +54,33 @@ class _BubbleWidgetState extends State<BubbleWidget>
     setState(() {});
   }
 
-  void _onLongPressStart(LongPressStartDetails details) {
-    _pressStartTime = DateTime.now();
-    _controller.forward();
-  }
+  List<Particle> _generateParticles() {
+    final Random random = Random();
+    List<Particle> particles = [];
 
-  void _onLongPressEnd(LongPressEndDetails details) {
-    _pressStartTime = DateTime.now();
-    _controller.reverse();
+    double radius = _bubbleSize / 3;
+
+    for (int i = 0; i < 15; i++) {
+      double angle = random.nextDouble() * pi * 2;
+      double speed = random.nextDouble() * 3 + 2;
+
+      Offset initialPosition = Offset(_position.dx + cos(angle) * radius,
+          _position.dy + sin(angle) * radius);
+
+      particles.add(Particle(
+        position: initialPosition,
+        velocity: Offset(cos(angle) * speed, sin(angle) * speed),
+        color: widget.bubble.materialColor.shade400,
+        size: random.nextDouble() * 10 + 5,
+        lifetime: random.nextDouble() * 0.8 + 5,
+      ));
+    }
+    return particles;
   }
 
   void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     final pressTime = DateTime.now().difference(_pressStartTime).inMilliseconds;
-    const totalPressTime = 1000;
+    const totalPressTime = 600;
     final animationProgress = (pressTime / totalPressTime).clamp(0.0, 1.0);
     _controller.value = animationProgress;
   }
@@ -81,13 +96,13 @@ class _BubbleWidgetState extends State<BubbleWidget>
     _ticker.start();
 
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+        vsync: this, duration: const Duration(milliseconds: 600));
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.addStatusListener((status) {
       _isExploding = status.isAnimating;
-      if (status.isCompleted) widget.onPopit();
+      if (status.isCompleted) widget.onPopit(_generateParticles());
     });
   }
 
@@ -108,8 +123,11 @@ class _BubbleWidgetState extends State<BubbleWidget>
         child: GestureDetector(
             onTap: widget.onTap,
             onDoubleTap: () => _controller.forward(),
-            onLongPressStart: _onLongPressStart,
-            onLongPressEnd: _onLongPressEnd,
+            onLongPressStart: (details) {
+              _pressStartTime = DateTime.now();
+              _controller.forward();
+            },
+            onLongPressEnd: (details) => _controller.reverse(),
             onLongPressMoveUpdate: _onLongPressMoveUpdate,
             onPanStart: (details) => widget.onDraggingToggle(true),
             onPanEnd: (details) => widget.onDraggingToggle(false),

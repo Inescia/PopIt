@@ -65,6 +65,15 @@ class HiveService {
     }
   }
 
+  static Future<void> setSpaceList(List<Space> spaceList) async {
+    try {
+      await box.clear();
+      await box.addAll(spaceList);
+    } catch (e) {
+      debugPrint('Error setSpaceList() : $e');
+    }
+  }
+
   static Future<void> addBubble(int spaceIndex, Bubble bubble) async {
     try {
       Space? space = getSpaceByIndex(spaceIndex);

@@ -25,14 +25,13 @@ class BubbleModal extends StatefulWidget {
 
 class _BubbleModal extends State<BubbleModal> {
   final TextEditingController _controller = TextEditingController();
-  Bubble _bubble = Bubble.fromTemplate();
+  late final Bubble _bubble;
 
   SizedBox get _circularLoader => const SizedBox(
       width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2));
 
   /* API CALLS */
   Future<void> _addBubble(BuildContext context) async {
-    print('add');
     if (_controller.text.isEmpty) return;
     await Provider.of<AppProvider>(context, listen: false)
         .addBubble(widget.spaceIndex, _bubble);
@@ -59,7 +58,8 @@ class _BubbleModal extends State<BubbleModal> {
   @override
   void initState() {
     super.initState();
-    if (widget.bubble != null) _bubble = Bubble.copy(widget.bubble!);
+    _bubble =
+        widget.isNew ? Bubble.fromTemplate() : Bubble.copy(widget.bubble!);
     _controller.text = _bubble.name;
   }
 
@@ -109,6 +109,7 @@ class _BubbleModal extends State<BubbleModal> {
                                 ]),
                             const SizedBox(height: 15),
                             TextField(
+                                autofocus: true,
                                 maxLength: 35,
                                 controller: _controller,
                                 textCapitalization:

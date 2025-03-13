@@ -29,12 +29,15 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reorderSpaceList(int oldIndex, int newIndex) {
+  void reorderSpaceList(int oldIndex, int newIndex) async {
     if (oldIndex < 0 || newIndex < 0 || oldIndex == newIndex) return;
-    final Space movedItem = spaceList.removeAt(oldIndex);
-    spaceList.insert(newIndex, movedItem);
+
+    final Space space = spaceList.elementAt(oldIndex);
+    spaceList.removeAt(oldIndex);
+    spaceList.insert(newIndex, space);
 
     notifyListeners();
+    HiveService.setSpaceList(spaceList);
   }
 
   Space? getSpaceByIndex(int index) {
@@ -48,15 +51,15 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> addSpace(Space space) async {
     setLoading('add', true);
-    await HiveService.addSpace(space);
     _spaceList.add(space);
+    await HiveService.addSpace(space);
     setLoading('add', false);
   }
 
   Future<void> removeSpace(int index) async {
     setLoading('remove', true);
-    await HiveService.removeSpaceByIndex(index);
     _spaceList.removeAt(index);
+    await HiveService.removeSpaceByIndex(index);
     setLoading('remove', false);
   }
 
