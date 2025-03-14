@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:popit/classes/bubble.dart';
 import 'package:popit/components/locale_icon.dart';
 import 'package:popit/components/bubble_modal.dart';
 import 'package:popit/components/space_modal.dart';
 import 'package:popit/providers/app_provider.dart';
 import 'package:popit/screens/dashboard.dart';
 import 'package:popit/screens/space_screen.dart';
+import 'package:popit/services.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -21,11 +23,28 @@ class _Home extends State<Home> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _isDragging = false;
+  bool _isLoading = false;
 
   bool _isDashboard([int? index]) => index == 0 || _currentPage == 0;
 
   Color _getColorByIndex(AppProvider provider, int index) {
     return provider.getSpaceByIndex(index)!.materialColor.shade200;
+  }
+
+  Future<void> _addBubble(AppProvider provider, Bubble bubble) async {
+    await provider.addBubble(_currentPage - 1, bubble);
+  }
+
+  Future<void> _addBubblesFromImage(AppProvider provider) async {
+    setState(() => _isLoading = true);
+    final List<String> textList = await recognizeTextFromImage();
+
+    for (String text in textList) {
+      final Bubble bubble = Bubble.fromTemplate();
+      bubble.name = text;
+      await _addBubble(provider, bubble);
+    }
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -44,7 +63,7 @@ class _Home extends State<Home> {
                     fontWeight: FontWeight.w700,
                     shadows: const [
                       BoxShadow(
-                          color: Colors.black26,
+                          color: Colors.black12,
                           offset: Offset(0, 2),
                           blurRadius: 6)
                     ],
@@ -55,15 +74,21 @@ class _Home extends State<Home> {
                 ? const [LocaleIcon()]
                 : [
                     IconButton(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 12, horizontal: 17),
+                        padding: EdgeInsets.only(
+                            top: 12, bottom: 10, right: 10, left: 10),
+                        onPressed: () => _addBubblesFromImage(provider),
+                        icon: Image.asset('assets/picture.png')),
+                    IconButton(
+                        padding: EdgeInsets.only(
+                            top: 12, bottom: 12, right: 10, left: 10),
                         onPressed: () => _pageController.animateToPage(
                               0,
                               duration: Duration(
                                   milliseconds: 300 * (_currentPage + 1)),
                               curve: Curves.easeInOut,
                             ),
-                        icon: Image.asset('assets/home.png'))
+                        icon: Image.asset('assets/home.png')),
+                    SizedBox(width: 10)
                   ],
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(3),
@@ -75,7 +100,7 @@ class _Home extends State<Home> {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: const [
                           BoxShadow(
-                              color: Colors.black26,
+                              color: Colors.black12,
                               offset: Offset(0, 2),
                               blurRadius: 6)
                         ],
@@ -107,6 +132,15 @@ class _Home extends State<Home> {
                       onDraggingToggle: (value) => _isDragging = value);
                 }
               }),
+          if (_isLoading)
+            Center(
+                child: SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 7,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            _getColorByIndex(provider, _currentPage - 1))))),
           if (!_isDashboard())
             Positioned(
                 bottom: 30,

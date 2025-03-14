@@ -12,12 +12,6 @@ class SpaceCard extends StatelessWidget {
       required this.index,
       super.key});
 
-  BoxShadow get _boxShadow => BoxShadow(
-        color: Colors.black26,
-        offset: Offset(0, 2),
-        blurRadius: 3,
-      );
-
   TextStyle get _textStyle => TextStyle(
           color: Colors.white,
           fontSize: 18,
@@ -59,14 +53,20 @@ class SpaceCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(children: [
-                Text('${space.name} - ${space.bubbleList.length.toString()}',
+                Text(
+                    '${space.name} - ${space.bubbleList.isEmpty ? '' : space.bubbleList.length.toString()}',
                     style: _textStyle),
-                const Icon(Icons.bubble_chart, color: Colors.white, shadows: [
-                  Shadow(
-                      offset: Offset(2, 2),
-                      blurRadius: 8.0,
-                      color: Colors.black12)
-                ]),
+                Icon(
+                    space.bubbleList.isEmpty
+                        ? Icons.emoji_events_rounded
+                        : Icons.bubble_chart,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                          offset: Offset(2, 2),
+                          blurRadius: 8.0,
+                          color: Colors.black12)
+                    ]),
                 Expanded(child: Container()),
                 IconButton(
                     onPressed: () => _showSpaceModal(context),

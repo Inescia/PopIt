@@ -34,6 +34,37 @@ class _BubbleWidgetState extends State<BubbleWidget>
 
   late DateTime _pressStartTime;
 
+  List<Particle> _generateParticles() {
+    final Random random = Random();
+    List<Particle> particles = [];
+
+    double radius = _bubbleSize / 3;
+
+    for (int i = 0; i < 15; i++) {
+      double angle = random.nextDouble() * pi * 2;
+      double speed = random.nextDouble() * 3 + 2;
+
+      Offset initialPosition = Offset(_position.dx + cos(angle) * radius,
+          _position.dy + sin(angle) * radius);
+
+      particles.add(Particle(
+        position: initialPosition,
+        velocity: Offset(cos(angle) * speed, sin(angle) * speed),
+        color: widget.bubble.materialColor.shade200,
+        size: random.nextDouble() * 10 + 5,
+        lifetime: random.nextDouble() * 0.8 + 5,
+      ));
+    }
+    return particles;
+  }
+
+  void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    final pressTime = DateTime.now().difference(_pressStartTime).inMilliseconds;
+    const totalPressTime = 600;
+    final animationProgress = (pressTime / totalPressTime);
+    _controller.value = animationProgress;
+  }
+
   void _updatePosition(Duration elapsed) {
     if (_isExploding) return;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -52,37 +83,6 @@ class _BubbleWidgetState extends State<BubbleWidget>
           _position.dx, _position.dy.clamp(0, screenHeight - _bubbleSize));
     }
     setState(() {});
-  }
-
-  List<Particle> _generateParticles() {
-    final Random random = Random();
-    List<Particle> particles = [];
-
-    double radius = _bubbleSize / 3;
-
-    for (int i = 0; i < 15; i++) {
-      double angle = random.nextDouble() * pi * 2;
-      double speed = random.nextDouble() * 3 + 2;
-
-      Offset initialPosition = Offset(_position.dx + cos(angle) * radius,
-          _position.dy + sin(angle) * radius);
-
-      particles.add(Particle(
-        position: initialPosition,
-        velocity: Offset(cos(angle) * speed, sin(angle) * speed),
-        color: widget.bubble.materialColor.shade400,
-        size: random.nextDouble() * 10 + 5,
-        lifetime: random.nextDouble() * 0.8 + 5,
-      ));
-    }
-    return particles;
-  }
-
-  void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    final pressTime = DateTime.now().difference(_pressStartTime).inMilliseconds;
-    const totalPressTime = 600;
-    final animationProgress = (pressTime / totalPressTime).clamp(0.0, 1.0);
-    _controller.value = animationProgress;
   }
 
   @override

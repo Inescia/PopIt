@@ -30,9 +30,10 @@ class _BubbleModal extends State<BubbleModal> {
   SizedBox get _circularLoader => const SizedBox(
       width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2));
 
+  bool get _isEmpty => _controller.text.isEmpty;
+
   /* API CALLS */
   Future<void> _addBubble(BuildContext context) async {
-    if (_controller.text.isEmpty) return;
     await Provider.of<AppProvider>(context, listen: false)
         .addBubble(widget.spaceIndex, _bubble);
   }
@@ -43,7 +44,6 @@ class _BubbleModal extends State<BubbleModal> {
   }
 
   Future<void> _updateBubble(BuildContext context) async {
-    if (_controller.text.isEmpty) return;
     await Provider.of<AppProvider>(context, listen: false)
         .updateBubble(widget.spaceIndex, _bubble, widget.index!);
   }
@@ -115,13 +115,15 @@ class _BubbleModal extends State<BubbleModal> {
                                 textCapitalization:
                                     TextCapitalization.sentences,
                                 onChanged: (value) => _bubble.name = value,
-                                onEditingComplete: () => (widget.isNew
-                                        ? _addBubble(context)
-                                        : _updateBubble(context))
-                                    .then(
-                                        (value) => Navigator.of(context).pop()),
+                                onEditingComplete: () => _isEmpty
+                                    ? null
+                                    : (widget.isNew
+                                            ? _addBubble(context)
+                                            : _updateBubble(context))
+                                        .then((value) =>
+                                            Navigator.of(context).pop()),
                                 decoration: InputDecoration(
-                                  errorText: _controller.text.isEmpty
+                                  errorText: _isEmpty
                                       ? AppLocalizations.of(context)!
                                           .field_name_required
                                       : null,
@@ -217,17 +219,20 @@ class _BubbleModal extends State<BubbleModal> {
                                             ? _circularLoader
                                             : Text(AppLocalizations.of(context)!
                                                 .button_update),
-                                        onPressed: () => _updateBubble(context)
-                                            .then((value) =>
-                                                Navigator.of(context).pop()))
+                                        onPressed: () => _isEmpty
+                                            ? null
+                                            : _updateBubble(context).then(
+                                                (value) => Navigator.of(context)
+                                                    .pop()))
                                   else
                                     TextButton(
                                         child: appProvider.isLoading('add')
                                             ? _circularLoader
                                             : Text(AppLocalizations.of(context)!
                                                 .button_add),
-                                        onPressed: () => _addBubble(context)
-                                            .then((value) =>
+                                        onPressed: () => _isEmpty
+                                            ? null
+                                            : _addBubble(context).then((value) =>
                                                 Navigator.of(context).pop()))
                                 ])
                           ]))))));
