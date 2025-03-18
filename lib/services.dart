@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
@@ -6,11 +8,22 @@ import 'package:hive/hive.dart';
 import 'package:popit/classes/bubble.dart';
 import 'package:popit/classes/space.dart';
 import 'dart:async';
+import 'package:image/image.dart';
 
 Future<String> _pickImage() async {
   final ImagePicker picker = ImagePicker();
   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-  return image!.path;
+
+  final img = decodeImage(await image!.readAsBytes());
+  if (img == null) return image.path;
+
+  final croppedImage =
+      copyCrop(img, x: 0, y: 100, width: img.width, height: img.height - 80);
+
+  final croppedFile = File(image.path)
+    ..writeAsBytesSync(encodeJpg(croppedImage));
+
+  return croppedFile.path;
 }
 
 Future<List<String>> recognizeTextFromImage() async {
@@ -34,7 +47,7 @@ Future<List<String>> recognizeTextFromImage() async {
     }
   }
   textRecognizer.close();
-  return textList.sublist(0, 10);
+  return textList.length >= 15 ? textList.sublist(0, 15) : textList;
 }
 
 class HiveService {

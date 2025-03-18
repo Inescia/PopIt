@@ -92,7 +92,8 @@ class _BubbleModal extends State<BubbleModal> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
+                                  Expanded(
+                                      child: Text(
                                     overflow: TextOverflow.ellipsis,
                                     widget.isNew
                                         ? AppLocalizations.of(context)!
@@ -100,7 +101,8 @@ class _BubbleModal extends State<BubbleModal> {
                                         : _bubble.name,
                                     style: const TextStyle(
                                         fontSize: 20, color: Colors.black),
-                                  ),
+                                    maxLines: 1,
+                                  )),
                                   GestureDetector(
                                     onTap: () => Navigator.of(context).pop(),
                                     child: const Icon(Icons.close,

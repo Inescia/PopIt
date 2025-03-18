@@ -84,7 +84,8 @@ class _SpaceModal extends State<SpaceModal> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
+                                  Expanded(
+                                      child: Text(
                                     overflow: TextOverflow.ellipsis,
                                     widget.isNew
                                         ? AppLocalizations.of(context)!
@@ -92,7 +93,8 @@ class _SpaceModal extends State<SpaceModal> {
                                         : _space.name,
                                     style: const TextStyle(
                                         fontSize: 20, color: Colors.black),
-                                  ),
+                                    maxLines: 1,
+                                  )),
                                   GestureDetector(
                                     onTap: () => Navigator.of(context).pop(),
                                     child: const Icon(Icons.close,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -37,12 +38,18 @@ class _Home extends State<Home> {
 
   Future<void> _addBubblesFromImage(AppProvider provider) async {
     setState(() => _isLoading = true);
-    final List<String> textList = await recognizeTextFromImage();
+    try {
+      final List<String> textList = await recognizeTextFromImage();
 
-    for (String text in textList) {
-      final Bubble bubble = Bubble.fromTemplate();
-      bubble.name = text;
-      await _addBubble(provider, bubble);
+      for (String text in textList) {
+        final Bubble bubble = Bubble.fromTemplate();
+        bubble.name = text;
+        await _addBubble(provider, bubble);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
     }
     setState(() => _isLoading = false);
   }
@@ -173,17 +180,14 @@ class _Home extends State<Home> {
                         builder: (BuildContext context) =>
                             const SpaceModal(isNew: true)))
                 : null
-            : provider.spaceList[_currentPage - 1].bubbleList.length < 10
-                ? FloatingActionButton(
-                    backgroundColor:
-                        _getColorByIndex(provider, _currentPage - 1),
-                    child: const Icon(Icons.add_rounded, size: 40),
-                    onPressed: () => showDialog(
-                        context: context,
-                        barrierColor: Colors.white.withAlpha(0),
-                        barrierDismissible: false,
-                        builder: (BuildContext context) => BubbleModal(
-                            spaceIndex: _currentPage - 1, isNew: true)))
-                : null);
+            : FloatingActionButton(
+                backgroundColor: _getColorByIndex(provider, _currentPage - 1),
+                child: const Icon(Icons.add_rounded, size: 40),
+                onPressed: () => showDialog(
+                    context: context,
+                    barrierColor: Colors.white.withAlpha(0),
+                    barrierDismissible: false,
+                    builder: (BuildContext context) => BubbleModal(
+                        spaceIndex: _currentPage - 1, isNew: true))));
   }
 }
