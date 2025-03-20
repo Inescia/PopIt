@@ -67,7 +67,7 @@ class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
                 barrierDismissible: false,
                 barrierColor: Colors.white.withAlpha(0),
                 builder: (BuildContext context) => BubbleModal(
-                      spaceIndex: widget.index - 1,
+                      spaceIndex: widget.index,
                       bubble: bubble.value,
                       index: bubble.key,
                     ))),

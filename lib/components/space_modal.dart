@@ -66,164 +66,182 @@ class _SpaceModal extends State<SpaceModal> {
     return Consumer<AppProvider>(builder: (context, appProvider, _) {
       return Dialog(
           backgroundColor: Colors.transparent,
-          child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: SingleChildScrollView(
-                      child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(150),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.grey, width: 1),
-                          ),
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                            Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                      child: Text(
-                                    overflow: TextOverflow.ellipsis,
-                                    widget.isNew
-                                        ? AppLocalizations.of(context)!
-                                            .new_space
-                                        : _space.name,
-                                    style: const TextStyle(
-                                        fontSize: 20, color: Colors.black),
-                                    maxLines: 1,
-                                  )),
-                                  GestureDetector(
-                                    onTap: () => Navigator.of(context).pop(),
-                                    child: const Icon(Icons.close,
-                                        color: Colors.black),
-                                  )
-                                ]),
-                            const SizedBox(height: 15),
-                            TextField(
-                                maxLength: 35,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                                controller: _controller,
-                                onChanged: (value) => _space.name = value,
-                                onEditingComplete: () => (widget.isNew
-                                        ? _addSpace(context)
-                                        : _updateSpace(context))
-                                    .then(
-                                        (value) => Navigator.of(context).pop()),
-                                decoration: InputDecoration(
-                                  errorText: _controller.text.isEmpty
-                                      ? AppLocalizations.of(context)!
-                                          .field_name_required
-                                      : null,
-                                  isDense: true,
-                                  labelStyle: const TextStyle(fontSize: 12),
-                                  labelText:
-                                      AppLocalizations.of(context)!.field_name,
-                                )),
-                            const SizedBox(height: 20),
-                            Column(children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: List.generate(
-                                    5,
-                                    (index) => GestureDetector(
-                                        onTap: () => _changeColorByIndex(index),
-                                        child: Container(
-                                            width: 35,
-                                            height: 35,
-                                            decoration: BoxDecoration(
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                      color: Colors.black26,
-                                                      offset: Offset(0, 2),
-                                                      blurRadius: 6)
-                                                ],
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                border: Border.all(
-                                                    color: Colors.white,
-                                                    width:
-                                                        _space.materialColor ==
-                                                                getColorByIndex(
-                                                                    index)
-                                                            ? 2
-                                                            : 0),
-                                                color: getColorByIndex(index)
-                                                    .shade200)))),
+          child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 400),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      child: SingleChildScrollView(
+                          child: Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(150),
+                                borderRadius: BorderRadius.circular(20),
+                                border:
+                                    Border.all(color: Colors.grey, width: 1),
                               ),
-                              const SizedBox(height: 15),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: List.generate(
-                                    5,
-                                    (index) => GestureDetector(
-                                        onTap: () =>
-                                            _changeColorByIndex(index + 5),
-                                        child: Container(
-                                            width: 35,
-                                            height: 35,
-                                            decoration: BoxDecoration(
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                      color: Colors.black26,
-                                                      offset: Offset(0, 2),
-                                                      blurRadius: 6)
-                                                ],
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                border: Border.all(
-                                                    color: Colors.white,
-                                                    width:
-                                                        _space.materialColor ==
-                                                                getColorByIndex(
-                                                                    index + 5)
-                                                            ? 2
-                                                            : 0),
-                                                color:
-                                                    getColorByIndex(index + 5)
-                                                        .shade200)))),
-                              )
-                            ]),
-                            const SizedBox(height: 20),
-                            Row(
-                                mainAxisAlignment: widget.isNew
-                                    ? MainAxisAlignment.end
-                                    : MainAxisAlignment.spaceBetween,
-                                children: [
-                                  if (!widget.isNew)
-                                    TextButton(
-                                        child: appProvider.isLoading('remove')
-                                            ? _circularLoader
-                                            : Text(AppLocalizations.of(context)!
-                                                .button_remove),
-                                        onPressed: () => _removeSpace(context)
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            overflow: TextOverflow.ellipsis,
+                                            widget.isNew
+                                                ? AppLocalizations.of(context)!
+                                                    .new_space
+                                                : _space.name,
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.black),
+                                            maxLines: 1,
+                                          )),
+                                          GestureDetector(
+                                            onTap: () =>
+                                                Navigator.of(context).pop(),
+                                            child: const Icon(Icons.close,
+                                                color: Colors.black),
+                                          )
+                                        ]),
+                                    const SizedBox(height: 15),
+                                    TextField(
+                                        maxLength: 35,
+                                        textCapitalization:
+                                            TextCapitalization.sentences,
+                                        controller: _controller,
+                                        onChanged: (value) =>
+                                            _space.name = value,
+                                        onEditingComplete: () => (widget.isNew
+                                                ? _addSpace(context)
+                                                : _updateSpace(context))
                                             .then((value) =>
-                                                Navigator.of(context).pop())),
-                                  if (!widget.isNew)
-                                    TextButton(
-                                        child: appProvider.isLoading('update')
-                                            ? _circularLoader
-                                            : Text(AppLocalizations.of(context)!
-                                                .button_update),
-                                        onPressed: () => _updateSpace(context)
-                                            .then((value) =>
-                                                Navigator.of(context).pop()))
-                                  else
-                                    TextButton(
-                                        child: appProvider.isLoading('add')
-                                            ? _circularLoader
-                                            : Text(AppLocalizations.of(context)!
-                                                .button_add),
-                                        onPressed: () => _addSpace(context)
-                                            .then((value) =>
-                                                Navigator.of(context).pop()))
-                                ])
-                          ]))))));
+                                                Navigator.of(context).pop()),
+                                        decoration: InputDecoration(
+                                          errorText: _controller.text.isEmpty
+                                              ? AppLocalizations.of(context)!
+                                                  .field_name_required
+                                              : null,
+                                          isDense: true,
+                                          labelStyle:
+                                              const TextStyle(fontSize: 12),
+                                          labelText:
+                                              AppLocalizations.of(context)!
+                                                  .field_name,
+                                        )),
+                                    const SizedBox(height: 20),
+                                    Column(children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: List.generate(
+                                            5,
+                                            (index) => GestureDetector(
+                                                onTap: () =>
+                                                    _changeColorByIndex(index),
+                                                child: Container(
+                                                    width: 35,
+                                                    height: 35,
+                                                    decoration: BoxDecoration(
+                                                        boxShadow: const [
+                                                          BoxShadow(
+                                                              color: Colors
+                                                                  .black26,
+                                                              offset:
+                                                                  Offset(0, 2),
+                                                              blurRadius: 6)
+                                                        ],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5),
+                                                        border: Border.all(
+                                                            color: Colors.white,
+                                                            width: _space.materialColor ==
+                                                                    getColorByIndex(
+                                                                        index)
+                                                                ? 2
+                                                                : 0),
+                                                        color: getColorByIndex(
+                                                                index)
+                                                            .shade200)))),
+                                      ),
+                                      const SizedBox(height: 15),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: List.generate(
+                                            5,
+                                            (index) => GestureDetector(
+                                                onTap: () =>
+                                                    _changeColorByIndex(
+                                                        index + 5),
+                                                child: Container(
+                                                    width: 35,
+                                                    height: 35,
+                                                    decoration: BoxDecoration(
+                                                        boxShadow: const [
+                                                          BoxShadow(
+                                                              color: Colors
+                                                                  .black26,
+                                                              offset:
+                                                                  Offset(0, 2),
+                                                              blurRadius: 6)
+                                                        ],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5),
+                                                        border: Border.all(
+                                                            color: Colors.white,
+                                                            width:
+                                                                _space.materialColor == getColorByIndex(index + 5)
+                                                                    ? 2
+                                                                    : 0),
+                                                        color: getColorByIndex(
+                                                                index + 5)
+                                                            .shade200)))),
+                                      )
+                                    ]),
+                                    const SizedBox(height: 20),
+                                    Row(
+                                        mainAxisAlignment: widget.isNew
+                                            ? MainAxisAlignment.end
+                                            : MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          if (!widget.isNew)
+                                            TextButton(
+                                                child: appProvider
+                                                        .isLoading('remove')
+                                                    ? _circularLoader
+                                                    : Text(AppLocalizations.of(
+                                                            context)!
+                                                        .button_remove),
+                                                onPressed: () => _removeSpace(
+                                                        context)
+                                                    .then((value) =>
+                                                        Navigator.of(context)
+                                                            .pop())),
+                                          if (!widget.isNew)
+                                            TextButton(
+                                                child: appProvider.isLoading('update')
+                                                    ? _circularLoader
+                                                    : Text(AppLocalizations.of(context)!
+                                                        .button_update),
+                                                onPressed: () => _updateSpace(context).then(
+                                                    (value) => Navigator.of(context)
+                                                        .pop()))
+                                          else
+                                            TextButton(
+                                                child: appProvider.isLoading('add')
+                                                    ? _circularLoader
+                                                    : Text(AppLocalizations.of(context)!
+                                                        .button_add),
+                                                onPressed: () => _addSpace(context)
+                                                    .then((value) => Navigator.of(context).pop()))
+                                        ])
+                                  ])))))));
     });
   }
 }

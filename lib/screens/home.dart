@@ -38,6 +38,8 @@ class _Home extends State<Home> {
 
   Future<void> _addBubblesFromImage(AppProvider provider) async {
     setState(() => _isLoading = true);
+    Future.delayed(
+        Duration(seconds: 30), () => setState(() => _isLoading = false));
     try {
       final List<String> textList = await recognizeTextFromImage();
 
@@ -88,12 +90,15 @@ class _Home extends State<Home> {
                     IconButton(
                         padding: EdgeInsets.only(
                             top: 12, bottom: 12, right: 10, left: 10),
-                        onPressed: () => _pageController.animateToPage(
-                              0,
-                              duration: Duration(
-                                  milliseconds: 300 * (_currentPage + 1)),
-                              curve: Curves.easeInOut,
-                            ),
+                        onPressed: () {
+                          setState(() => _isLoading = false);
+                          _pageController.animateToPage(
+                            0,
+                            duration: Duration(
+                                milliseconds: 300 * (_currentPage + 1)),
+                            curve: Curves.easeInOut,
+                          );
+                        },
                         icon: Image.asset('assets/home.png')),
                     SizedBox(width: 10)
                   ],
@@ -118,7 +123,7 @@ class _Home extends State<Home> {
           Positioned.fill(
               child: Image.asset('assets/bg.jpg', fit: BoxFit.cover)),
           PageView.builder(
-              pageSnapping: !_isDragging,
+              pageSnapping: !_isDragging || !_isLoading,
               controller: _pageController,
               itemCount: provider.spaceList.length + 1,
               onPageChanged: (index) => setState(() => _currentPage = index),
