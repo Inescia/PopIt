@@ -6,6 +6,8 @@ import 'package:popit/classes/bubble.dart';
 import 'package:popit/classes/particle.dart';
 import 'package:popit/components/bubble_modal.dart';
 import 'package:popit/components/bubble_widget.dart';
+import 'package:popit/controllers/bubble_motion_controller.dart';
+import 'package:popit/utils/shake_detector.dart';
 
 class SpaceScreen extends StatefulWidget {
   final int index;
@@ -23,13 +25,19 @@ class SpaceScreen extends StatefulWidget {
 
 class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
   final List<Particle> _particlesList = [];
+  final BubbleMotionController _motionController = BubbleMotionController();
   late Ticker _ticker;
+  late ShakeDetector _shakeDetector;
+  final Set<Bubble> _pendingRemovals = {};
 
   Future<void> _handleExplosion(
-      BuildContext context, int index, List<Particle> particles) async {
+      BuildContext context, Bubble bubble, List<Particle> particles) async {
     _particlesList.addAll(particles);
-    await Provider.of<AppProvider>(context, listen: false)
-        .removeBubble(widget.index, index);
+    if (!_pendingRemovals.add(bubble)) return;
+
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    await provider.removeBubbleObject(widget.index, bubble);
+    _pendingRemovals.remove(bubble);
   }
 
   void _updateParticles(Duration elapsed) {
@@ -44,10 +52,17 @@ class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
     super.initState();
     _ticker = createTicker(_updateParticles);
     _ticker.start();
+    _shakeDetector = ShakeDetector(
+      onShake: (intensity) => _motionController.shake(intensity),
+      onStrongShake: () => _motionController.explodeAll(),
+    );
+    _shakeDetector.start();
   }
 
   @override
   void dispose() {
+    _shakeDetector.dispose();
+    _motionController.dispose();
     _ticker.dispose();
     super.dispose();
   }
@@ -59,9 +74,10 @@ class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
         BubbleWidget(
             key: ValueKey(bubble.value),
             bubble: bubble.value,
+            motionController: _motionController,
             onDraggingToggle: (value) => widget.onDraggingToggle(value),
             onPopit: (particles) =>
-                _handleExplosion(context, bubble.key, particles),
+                _handleExplosion(context, bubble.value, particles),
             onTap: () => showDialog(
                 context: context,
                 barrierDismissible: false,

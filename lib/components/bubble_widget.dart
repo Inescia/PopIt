@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:popit/classes/bubble.dart';
 import 'package:popit/classes/particle.dart';
+import 'package:popit/controllers/bubble_motion_controller.dart';
 
 class BubbleWidget extends StatefulWidget {
   final Bubble bubble;
   final VoidCallback onTap;
   final Function onDraggingToggle;
   final Function(List<Particle>) onPopit;
+  final BubbleMotionController? motionController;
 
   const BubbleWidget(
       {required this.onTap,
       required this.onDraggingToggle,
       required this.onPopit,
       required this.bubble,
+      this.motionController,
       super.key});
 
   @override
@@ -23,16 +26,24 @@ class BubbleWidget extends StatefulWidget {
 
 class _BubbleWidgetState extends State<BubbleWidget>
     with TickerProviderStateMixin {
+  static const double _bubbleSize = 120;
+  static const double _friction = 0.992;
+  static const double _minSpeed = 0.04;
+  static const double _maxThrowSpeed = 28;
+  static const double _pixelsPerSecondToFrame = 1 / 60;
+
   late Ticker _ticker;
   late Offset _position;
   late Offset _velocity;
-  final double _bubbleSize = 120;
 
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isExploding = false;
+  bool _isDragging = false;
 
   late DateTime _pressStartTime;
+  int _lastShakeToken = 0;
+  int _lastExplodeToken = 0;
 
   List<Particle> _generateParticles() {
     final Random random = Random();
@@ -65,8 +76,43 @@ class _BubbleWidgetState extends State<BubbleWidget>
     _controller.value = animationProgress;
   }
 
+  void _applyImpulse(double intensity) {
+    if (_isExploding || _isDragging) return;
+    final random = Random();
+    final angle = random.nextDouble() * pi * 2;
+    final force = intensity * (0.65 + random.nextDouble() * 0.7);
+    _velocity += Offset(cos(angle) * force, sin(angle) * force);
+  }
+
+  void _triggerExplode() {
+    if (_isExploding || _controller.isAnimating) return;
+    _controller.forward();
+  }
+
+  void _onMotionChanged() {
+    final controller = widget.motionController;
+    if (controller == null) return;
+
+    if (controller.explodeToken != _lastExplodeToken) {
+      _lastExplodeToken = controller.explodeToken;
+      _triggerExplode();
+      return;
+    }
+
+    if (controller.shakeToken != _lastShakeToken) {
+      _lastShakeToken = controller.shakeToken;
+      _applyImpulse(controller.shakeIntensity);
+    }
+  }
+
+  Offset _clampVelocity(Offset velocity) {
+    final speed = velocity.distance;
+    if (speed <= _maxThrowSpeed) return velocity;
+    return velocity * (_maxThrowSpeed / speed);
+  }
+
   void _updatePosition(Duration elapsed) {
-    if (_isExploding) return;
+    if (_isExploding || _isDragging) return;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -82,6 +128,12 @@ class _BubbleWidgetState extends State<BubbleWidget>
       _position = Offset(
           _position.dx, _position.dy.clamp(0, screenHeight - _bubbleSize));
     }
+
+    _velocity *= _friction;
+    if (_velocity.distance < _minSpeed) {
+      _velocity = Offset.zero;
+    }
+
     setState(() {});
   }
 
@@ -104,10 +156,32 @@ class _BubbleWidgetState extends State<BubbleWidget>
       _isExploding = status.isAnimating;
       if (status.isCompleted) widget.onPopit(_generateParticles());
     });
+
+    final motionController = widget.motionController;
+    if (motionController != null) {
+      _lastShakeToken = motionController.shakeToken;
+      _lastExplodeToken = motionController.explodeToken;
+      motionController.addListener(_onMotionChanged);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant BubbleWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.motionController != widget.motionController) {
+      oldWidget.motionController?.removeListener(_onMotionChanged);
+      final motionController = widget.motionController;
+      if (motionController != null) {
+        _lastShakeToken = motionController.shakeToken;
+        _lastExplodeToken = motionController.explodeToken;
+        motionController.addListener(_onMotionChanged);
+      }
+    }
   }
 
   @override
   void dispose() {
+    widget.motionController?.removeListener(_onMotionChanged);
     _ticker.dispose();
     _controller.dispose();
     super.dispose();
@@ -122,18 +196,30 @@ class _BubbleWidgetState extends State<BubbleWidget>
         top: _position.dy,
         child: GestureDetector(
             onTap: widget.onTap,
-            onDoubleTap: () => _controller.forward(),
+            onDoubleTap: _triggerExplode,
             onLongPressStart: (details) {
               _pressStartTime = DateTime.now();
               _controller.forward();
             },
             onLongPressEnd: (details) => _controller.reverse(),
             onLongPressMoveUpdate: _onLongPressMoveUpdate,
-            onPanStart: (details) => widget.onDraggingToggle(true),
-            onPanEnd: (details) => widget.onDraggingToggle(false),
+            onPanStart: (details) {
+              _isDragging = true;
+              _velocity = Offset.zero;
+              widget.onDraggingToggle(true);
+            },
             onPanUpdate: (details) {
               _position += details.delta;
-              _velocity = details.delta * 0.5;
+              setState(() {});
+            },
+            onPanEnd: (details) {
+              _isDragging = false;
+              widget.onDraggingToggle(false);
+              // Throw strength follows finger fling speed (px/s → px/frame).
+              final throwVelocity = details.velocity.pixelsPerSecond *
+                  _pixelsPerSecondToFrame *
+                  1.1;
+              _velocity = _clampVelocity(throwVelocity);
             },
             child: AnimatedBuilder(
                 animation: _controller,

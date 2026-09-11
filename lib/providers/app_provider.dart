@@ -10,6 +10,7 @@ class AppProvider extends ChangeNotifier {
     'remove': false,
     'update': false
   };
+  Future<void> _bubbleRemovalChain = Future.value();
 
   List<Space> get spaceList => _spaceList;
 
@@ -80,6 +81,19 @@ class AppProvider extends ChangeNotifier {
     setLoading('remove', true);
     await HiveService.removeBubbleByIndex(spaceIndex, index);
     setLoading('remove', false);
+  }
+
+  /// Removes a bubble by identity so concurrent pops (e.g. shake-to-burst)
+  /// do not race on shifting list indexes.
+  Future<void> removeBubbleObject(int spaceIndex, Bubble bubble) {
+    final removal = _bubbleRemovalChain.then((_) async {
+      if (spaceIndex < 0 || spaceIndex >= _spaceList.length) return;
+      final index = _spaceList[spaceIndex].bubbleList.indexOf(bubble);
+      if (index < 0) return;
+      await removeBubble(spaceIndex, index);
+    });
+    _bubbleRemovalChain = removal.catchError((_) {});
+    return removal;
   }
 
   Future<void> updateBubble(int spaceIndex, Bubble bubble, int index) async {
