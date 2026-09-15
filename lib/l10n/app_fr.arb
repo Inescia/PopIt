@@ -11,5 +11,8 @@
 	"type_punctual": "Ponctuelle",
 	"type_daily": "Quotidienne",
 	"type_weekly": "Hebdomadaire",
-	"type_monthly": "Mensuelle"
+	"type_monthly": "Mensuelle",
+	"empty_space_hint": "Crée une nouvelle bulle",
+	"empty_space_body": "Ajoute ta première bulle et fais-la flotter.",
+	"empty_space_cta": "Nouvelle bulle"
 }

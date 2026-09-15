@@ -83,8 +83,8 @@ class AppProvider extends ChangeNotifier {
     setLoading('remove', false);
   }
 
-  /// Removes a bubble by identity so concurrent pops (e.g. shake-to-burst)
-  /// do not race on shifting list indexes.
+  /// Removes a bubble by identity so concurrent pops do not race on
+  /// shifting list indexes.
   Future<void> removeBubbleObject(int spaceIndex, Bubble bubble) {
     final removal = _bubbleRemovalChain.then((_) async {
       if (spaceIndex < 0 || spaceIndex >= _spaceList.length) return;

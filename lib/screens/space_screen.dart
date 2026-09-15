@@ -6,6 +6,7 @@ import 'package:popit/classes/bubble.dart';
 import 'package:popit/classes/particle.dart';
 import 'package:popit/components/bubble_modal.dart';
 import 'package:popit/components/bubble_widget.dart';
+import 'package:popit/components/empty_space_view.dart';
 import 'package:popit/controllers/bubble_motion_controller.dart';
 import 'package:popit/utils/shake_detector.dart';
 
@@ -13,11 +14,15 @@ class SpaceScreen extends StatefulWidget {
   final int index;
   final List<Bubble> bubbleList;
   final Function onDraggingToggle;
-  const SpaceScreen(
-      {required this.index,
-      required this.bubbleList,
-      super.key,
-      required this.onDraggingToggle});
+  final VoidCallback? onCreateBubble;
+
+  const SpaceScreen({
+    required this.index,
+    required this.bubbleList,
+    required this.onDraggingToggle,
+    this.onCreateBubble,
+    super.key,
+  });
 
   @override
   State<SpaceScreen> createState() => _SpaceScreen();
@@ -47,6 +52,19 @@ class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
     setState(() {});
   }
 
+  void _openCreateBubble() {
+    if (widget.onCreateBubble != null) {
+      widget.onCreateBubble!();
+      return;
+    }
+    showDialog(
+      context: context,
+      barrierColor: Colors.white.withAlpha(0),
+      barrierDismissible: false,
+      builder: (context) => BubbleModal(spaceIndex: widget.index, isNew: true),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +72,6 @@ class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
     _ticker.start();
     _shakeDetector = ShakeDetector(
       onShake: (intensity) => _motionController.shake(intensity),
-      onStrongShake: () => _motionController.explodeAll(),
     );
     _shakeDetector.start();
   }
@@ -69,6 +86,17 @@ class _SpaceScreen extends State<SpaceScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.bubbleList.isEmpty) {
+      final accent = Provider.of<AppProvider>(context)
+              .getSpaceByIndex(widget.index)
+              ?.materialColor ??
+          Colors.grey;
+      return EmptySpaceView(
+        accent: accent,
+        onCreate: _openCreateBubble,
+      );
+    }
+
     return Stack(alignment: Alignment.center, children: [
       for (MapEntry<int, Bubble> bubble in widget.bubbleList.asMap().entries)
         BubbleWidget(

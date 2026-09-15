@@ -171,6 +171,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monthly'**
   String get type_monthly;
+
+  /// No description provided for @empty_space_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new bubble'**
+  String get empty_space_hint;
+
+  /// No description provided for @empty_space_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first bubble and let it float.'**
+  String get empty_space_body;
+
+  /// No description provided for @empty_space_cta.
+  ///
+  /// In en, this message translates to:
+  /// **'New bubble'**
+  String get empty_space_cta;
 }
 
 class _AppLocalizationsDelegate

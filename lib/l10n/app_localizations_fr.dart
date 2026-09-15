@@ -43,4 +43,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get type_monthly => 'Mensuelle';
+
+  @override
+  String get empty_space_hint => 'Crée une nouvelle bulle';
+
+  @override
+  String get empty_space_body => 'Ajoute ta première bulle et fais-la flotter.';
+
+  @override
+  String get empty_space_cta => 'Nouvelle bulle';
 }

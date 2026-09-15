@@ -141,7 +141,13 @@ class _Home extends State<Home> {
                   return SpaceScreen(
                       index: index - 1,
                       bubbleList: provider.spaceList[index - 1].bubbleList,
-                      onDraggingToggle: (value) => _isDragging = value);
+                      onDraggingToggle: (value) => _isDragging = value,
+                      onCreateBubble: () => showDialog(
+                          context: context,
+                          barrierColor: Colors.white.withAlpha(0),
+                          barrierDismissible: false,
+                          builder: (BuildContext context) => BubbleModal(
+                              spaceIndex: index - 1, isNew: true)));
                 }
               }),
           if (_isLoading)

@@ -11,5 +11,8 @@
 	"type_punctual": "Punctual",
 	"type_daily": "Daily",
 	"type_weekly": "Weekly",
-	"type_monthly": "Monthly"
+	"type_monthly": "Monthly",
+	"empty_space_hint": "Create a new bubble",
+	"empty_space_body": "Add your first bubble and let it float.",
+	"empty_space_cta": "New bubble"
 }

@@ -60,23 +60,12 @@ class SpaceCard extends StatelessWidget {
                     space.bubbleList.isEmpty
                         ? Icons.emoji_events_rounded
                         : Icons.bubble_chart,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                          offset: Offset(2, 2),
-                          blurRadius: 8.0,
-                          color: Colors.black12)
-                    ]),
+                    color: Colors.white),
                 Expanded(child: Container()),
                 IconButton(
                     onPressed: () => _showSpaceModal(context),
                     color: Colors.white,
-                    icon: const Icon(Icons.more_vert, shadows: [
-                      Shadow(
-                          offset: Offset(2, 2),
-                          blurRadius: 8.0,
-                          color: Colors.black12)
-                    ]),
+                    icon: const Icon(Icons.more_vert),
                     iconSize: 25)
               ]))),
     );

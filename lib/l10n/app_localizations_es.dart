@@ -43,4 +43,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get type_monthly => 'Mensual';
+
+  @override
+  String get empty_space_hint => 'Crea una nueva burbuja';
+
+  @override
+  String get empty_space_body => 'Añade tu primera burbuja y déjala flotar.';
+
+  @override
+  String get empty_space_cta => 'Nueva burbuja';
 }

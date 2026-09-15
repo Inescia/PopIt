@@ -43,4 +43,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get type_monthly => 'Monthly';
+
+  @override
+  String get empty_space_hint => 'Create a new bubble';
+
+  @override
+  String get empty_space_body => 'Add your first bubble and let it float.';
+
+  @override
+  String get empty_space_cta => 'New bubble';
 }

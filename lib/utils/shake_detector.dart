@@ -1,33 +1,24 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 /// Detects phone shakes from the user accelerometer.
 ///
-/// Moderate shakes call [onShake] with an intensity used to jostle bubbles.
-/// A hard shake calls [onStrongShake] so every bubble can pop.
+/// Shakes call [onShake] with an intensity used to jostle bubbles.
 class ShakeDetector {
   ShakeDetector({
     required this.onShake,
-    required this.onStrongShake,
-    this.shakeThreshold = 4.5,
-    this.strongShakeThreshold = 14.0,
-    this.shakeCooldown = const Duration(milliseconds: 120),
-    this.strongShakeCooldown = const Duration(milliseconds: 1600),
+    this.shakeThreshold = 5.2,
+    this.shakeCooldown = const Duration(milliseconds: 90),
   });
 
   final void Function(double intensity) onShake;
-  final VoidCallback onStrongShake;
   final double shakeThreshold;
-  final double strongShakeThreshold;
   final Duration shakeCooldown;
-  final Duration strongShakeCooldown;
 
   StreamSubscription<UserAccelerometerEvent>? _subscription;
   DateTime? _lastShakeAt;
-  DateTime? _lastStrongShakeAt;
 
   void start() {
     _subscription?.cancel();
@@ -46,23 +37,15 @@ class ShakeDetector {
         sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
     final now = DateTime.now();
 
-    if (magnitude >= strongShakeThreshold) {
-      if (_lastStrongShakeAt == null ||
-          now.difference(_lastStrongShakeAt!) >= strongShakeCooldown) {
-        _lastStrongShakeAt = now;
-        _lastShakeAt = now;
-        onStrongShake();
-      }
-      return;
-    }
-
     if (magnitude >= shakeThreshold) {
       if (_lastShakeAt == null ||
           now.difference(_lastShakeAt!) >= shakeCooldown) {
         _lastShakeAt = now;
-        // Map raw magnitude into a pleasant impulse range for bubble physics.
-        final intensity = ((magnitude - shakeThreshold) / 2.5).clamp(1.5, 12.0);
-        onShake(intensity.toDouble());
+        // 0 = just above threshold, 1 = strong shake (~threshold + 12).
+        // Squared curve: light stays light, strong ramps up clearly.
+        final t = ((magnitude - shakeThreshold) / 12.0).clamp(0.0, 1.0);
+        final intensity = 0.7 + (t * t) * 14.5;
+        onShake(intensity);
       }
     }
   }

@@ -11,5 +11,8 @@
 	"type_punctual": "Ponctual",
 	"type_daily": "Diario",
 	"type_weekly": "Semanal",
-	"type_monthly": "Mensual"
+	"type_monthly": "Mensual",
+	"empty_space_hint": "Crea una nueva burbuja",
+	"empty_space_body": "Añade tu primera burbuja y déjala flotar.",
+	"empty_space_cta": "Nueva burbuja"
 }
