@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:popit/l10n/app_localizations.dart';
 import 'package:popit/classes/bubble.dart';
 import 'package:popit/components/locale_icon.dart';
 import 'package:popit/components/bubble_modal.dart';
